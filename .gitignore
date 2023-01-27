@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/CityCapsulaApp/FileContentIndex
+/.vs
+/city-capsula-app-win32-x64
+/node_modules
