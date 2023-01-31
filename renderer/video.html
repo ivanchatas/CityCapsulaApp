@@ -12,50 +12,24 @@
     <div class="screen video">
         <div class="container text-center">
             <div class="container pt-4 pb-4">
-                <div class="text-center" id="title-preview-rec">
-                    <img src="images/7PREVISUALIZAR/PREVISUALIZAR_TEXTO.png" width="100%">
+                <div id="title" class="text-center">
+                    <h2 class="title-rec" style="color:white; font-size: 45px;font-family: Gotham;">GRABANDO</h2>
                 </div>
                 <div class="capsule mt-4">
                     <video id="video" playsinline autoplay></video>
-                    <video id="preview-rec" playsinline autoplay loop></video>
                 </div>
             </div>
 
             <!-- Mensaje/animacion/imagen para indicar al usuario que espere mientras prepara -->
             <div class="row" id="loader-msg">
                 <div class="col mt-4">
-                    <h1 style="color: white">Espere...</h1>
+                    <h1 style="color:white; font-size: 45px;font-family: Gotham;">Espere...</h1>
                 </div>
             </div>
-            
-            <!-- Botones para la iniciar o detener la grabación -->
-            <div class="row" id="btn-recording">
-                <div class="col mt-4">
-                    <a id="startButton">
-                        <img src="images/4GRABARVIDEO/BOTON_GRABAR.png" width="40%">
-                    </a>
-                    <a id="stopButton">
-                        <img src="images/4GRABARVIDEO/BOTON_DETENERGRABAR.png" width="40%">
-                    </a>
-                </div>
-            </div>
-
-            <!-- Botones para la aprobación de video -->
-            <section id="btn-preview-rec">
-                <div class="row">
-                    <div class="col-6">
-                        <a id="again">
-                            <img src="images/7PREVISUALIZAR/BOTON_REINTENTAR.png" width="90%">
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a id="guardar">
-                            <img src="images/7PREVISUALIZAR/BOTON_GUARDAR.png" width="90%">
-                        </a>
-                    </div>
-                </div>
-            </section>
         </div>
+        <footer>
+            <img src="images/2OPCIONES/city-blanco.png" width="20%">
+        </footer>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>

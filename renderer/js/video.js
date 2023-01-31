@@ -1,134 +1,96 @@
-let localStream;
-let recorder;
 const fs = require('fs');
 
 const video = document.getElementById('video');
-const startButton = document.getElementById("startButton");
-const stopButton = document.getElementById("stopButton");
-
+const title = document.getElementById('title');
 const loaderMsg = document.getElementById('loader-msg');
-const btnRecording = document.getElementById('btn-recording');
 
-const titlePreview = document.getElementById('title-preview-rec');
-const preview = document.getElementById('preview-rec');
-const btnPreview = document.getElementById("btn-preview-rec");
-
-const again = document.getElementById("again");
-const btnSave = document.getElementById("guardar");
-
-let fileName;
-let storageStream;
+let mediaRecorder;
+let chunk = [];
 
 const constraints = {
-    audio: false,
+    audio: true,
     video: {
         facingMode: "user",
         frameRate: { min: 15, ideal: 24, max: 30 },
         width: { min: 450, ideal: 450, max: 1080 },
-        height: { min: 625, ideal: 625, max: 1920 }
+        height: { min: 625, ideal: 625, max: 1920 } 
     }
 };
 
 async function init() {
     try {
-        waitOn();
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        handleSuccess(stream);
-    } catch (e) {
-        console.log(`navigator.getUserMedia error:${e.toString()}`);
+        startWebcam(stream);
+    } catch (err) {
+        console.log('Error retrieving a media device.');
+        console.log(err);
     }
 }
 
-function handleSuccess(stream) {
+function startWebcam(stream) {
     window.stream = stream;
-    localStream = stream;
     video.srcObject = stream;
-
-    fileName = getNewVideoFileName();
-    recorder = new MediaRecorder(localStream);
-    storageStream = fs.createWriteStream(`${__dirname}/videos/${fileName}`);
-    recorder.ondataavailable = async e => {
-        storageStream.write(Buffer.from(await e.data.arrayBuffer()), (err) => {
-            if (err) {
-                console.log(err.message);
-            }
-        });
-        previewSavedVideo();
-    };
     readyOn();
+    startRecording();
 }
 
-startButton.onclick = function () {
-    recordingOn();
-    recorder.start();
-};
+function startRecording() {
+    if (video.srcObject === null) {
+        video.srcObject = window.stream;
+    }
+    mediaRecorder = new MediaRecorder(window.stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+    mediaRecorder.start();
+    mediaRecorder.ondataavailable = recordVideo;
+}
 
-stopButton.addEventListener("click", async () => {
-    startButton.style.display = 'block';
-    stopButton.style.display = 'none';
-    recorder.requestData();
-    recorder.stop();
-});
+async function recordVideo(event) {
+    if (event.data && event.data.size > 0) {
+        video.srcObject = null;
+        chunk = event.data;
+        let videoUrl = URL.createObjectURL(event.data);
+        video.src = videoUrl;
+        saveVideo();
+    }
+}
 
-again.addEventListener("click", async () => {
-    location.href = "form.html";
-});
+function stopRecording() {
+    mediaRecorder.stop();
+}
+
+async function saveVideo() {
+    console.log("grabando video");
+    console.log(chunk);
+    let buffer = Buffer.from(await chunk.arrayBuffer());
+    let fileName = `/${getNewVideoFileName()}`;
+    let fr = new FileReader();
+    fr.onload = async _ => {
+        fs.writeFile(fileName, buffer, () => {
+            console.log("Se ha guardado");
+            location.href = "form.html";  
+        });
+    }
+    fr.readAsArrayBuffer(chunk);
+}
 
 function getNewVideoFileName() {
     const dt = new Date();
     return`rec_${dt.getFullYear()}${dt.getMonth() + 1}${dt.getDate()}${dt.getHours()}${dt.getMinutes()}${dt.getSeconds()}${dt.getMilliseconds()}.webm`;
 }
 
-function previewSavedVideo() {
-    preview.src = `videos/${fileName}`;
-    previewOn();
-}
-
-function remove(path) {
-    if (existsSycn(path)) {
-        unlink(path, (err) => {
-            if (err) return;
-        });
-    }
-}
-
-function recordingOn() {
-    startButton.style.display = 'none';
-    stopButton.style.display = 'block';
-}
-
 function waitOn() {
     loaderMsg.style.display = "block";
-
-    titlePreview.style.display = "none";
-    preview.style.display = "none";
-    btnPreview.style.display = "none";
-
-    video.style.display = "none";
-    btnRecording.style.display = "none";
+    title.style.display = "none";
 }
 
 function readyOn() {
     loaderMsg.style.display = "none";
-
-    titlePreview.style.display = "none";
-    preview.style.display = "none";
-    btnPreview.style.display = "none";
-
-    video.style.display = "block";
-    btnRecording.style.display = "block";
+    title.style.display = "block";
 }
 
-function previewOn() {
-    loaderMsg.style.display = "none";
-
-    titlePreview.style.display = "block";
-    preview.style.display = "block";
-    btnPreview.style.display = "block";
-
-    video.style.display = "none";
-    btnRecording.style.display = "none";
-}
-
-stopButton.style.display = 'none';
-init();
+document.addEventListener('DOMContentLoaded', () => {
+    waitOn();
+    init();
+    setTimeout(() => {
+        stopRecording();
+    }, 16000);
+})

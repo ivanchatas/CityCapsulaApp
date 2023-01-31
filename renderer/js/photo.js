@@ -1,79 +1,106 @@
+const fs = require('fs');
+
 const video = document.getElementById('video');
 const template = document.getElementById('template');
 const isTime = document.getElementById('is-time');
-const photo = document.getElementById('photo');
+const img = document.getElementById('img');
 const canvas = document.getElementById('canvas');
+const preview = document.getElementById('group-btn-preview');
+const text_preview = document.getElementById('footer-is-intime');
 
-photo.style.display = 'none';
+const urlTemplate = 'images/6CONTEO/MARCO' + localStorage.getItem('template') + '.png'; 
 
 const constraints = {
     audio: false,
     video: {
         facingMode: "user",
+        frameRate: { min: 15, ideal: 24, max: 30 },
         width: { min: 450, ideal: 450, max: 1080 },
-        height: { min: 625, ideal: 625, max: 1920 } 
+        height: { min: 625, ideal: 625, max: 1920 }
     }
 };
 
-// Access webcam
-async function init() {
+const init = async () => {
     try {
+        waitOn();
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         handleSuccess(stream);
     } catch (e) {
-        errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+        console.log(`navigator.getUserMedia error:${e.toString()}`);
     }
 }
-  
-// Success
+
 function handleSuccess(stream) {
     window.stream = stream;
     video.srcObject = stream;
+    readyOn();
 }
 
-//imagen que subimos a continuación
-function getImage (url) {
-    var img = new Image();
-    img.onload = draw;
-    img.onerror = failed;
-    img.src = url;  
-};
-
-function draw() {
-    var ctx = canvas.getContext('2d');
-    ctx.globalAlpha = 0.5;
-    ctx.drawImage(this, 0, 0, 550, 550, 0, 0, 600, 500);
-    ctx.globalAlpha = 1; // dejamos la opacidad al 100% de nuevo
-    //he dejado de adaptar el tamaño del canvas a la nueva imagen
+const onScreenshot = () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.getContext('2d').drawImage(template,  0, 0, video.videoWidth, video.videoHeight);
+    img.src = canvas.toDataURL('image/png', 1.0);
+    done();
 }
 
-function failed() {
-    console.error("The provided file couldn't be loaded as an Image media");
-}
-
-function getCount() {
-    let isPhoto = false;
-    var n = 4;
+const count = () => {
+    console.log("count");
     var l = document.getElementById("number");
-    window.setInterval(function() {
+    
+    var n = 4;
+    const interval = setInterval(() => {
         l.innerHTML = n;
         n--;
-        if(n < 0 && !isPhoto) {
-            // Draw image
-            photo.style = 'display:block;';
-            isTime.style.display = 'none';
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            let image_data_url = canvas.toDataURL('image/jpeg');
-            photo.src = image_data_url;
-            // data url of the image
-            console.log(image_data_url);
-            isPhoto = true;
+        if (n < 0) {
+            clearInterval(interval);
+            l.style.display = 'block';
+            onScreenshot();
         }
     }, 1000);
 }
+    
+const waitOn = () => {
+    isTime.style.display = 'none';
+    preview.style.display = 'none';
+}
 
-// Load init
-const urlTemplate = 'images/6CONTEO/MARCO' + localStorage.getItem('template') + '.png'; 
-init();
-template.src = urlTemplate;
-getCount();
+function readyOn() {
+    img.style.display = 'none'
+    isTime.style.display = 'block';
+    preview.style.display = 'none';
+    count();
+}
+
+function done() {
+    img.style.display = 'block'
+    isTime.style.display = 'none';
+    preview.style.display = 'flex';
+    text_preview.style.display = 'none';
+}
+
+function saveCallback() {
+    // Get the DataUrl from the Canvas
+    const url = canvas.toDataURL('image/jpg', 1.0);
+
+    // remove Base64 stuff from the Image
+    const base64Data = url.replace(/^data:image\/png;base64,/, "");
+
+    var filePath = `/${getNewImgFileName()}`;
+
+    fs.writeFile(filePath, base64Data, 'base64', () => {
+        location.href = "form.html";  
+    });
+}
+
+function getNewImgFileName() {
+    const dt = new Date();
+    return`img_${dt.getFullYear()}${dt.getMonth() + 1}${dt.getDate()}${dt.getHours()}${dt.getMinutes()}${dt.getSeconds()}${dt.getMilliseconds()}.png`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load init
+    init();
+    template.src = urlTemplate;
+})

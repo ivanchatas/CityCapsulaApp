@@ -1,9 +1,14 @@
+@font-face {
+    font-family: 'Gotham';
+    src: url('./../fonts/Gotham-Bold_0\ 2.otf'); 
+}
+
 body {
     font-family: 'Gotham Bold', sans-serif;
 }
 
 .centered-element {
-    position: absolute;
+    /*position: absolute;*/
     transform: translateY(25%);
 }
 
@@ -142,6 +147,7 @@ footer {
 }
 
 #number {
+    font-family: Gotham;
     font-size:200px;
     color:#ffffff;
 }
@@ -171,4 +177,10 @@ form {
                 0 0 0.8rem #14728b,
                 0 0 2.8rem #14728b,
                 inset 0 0 1.3rem #14728b; 
+}
+
+.title_rec p {
+    color: white;
+    font-size: 45px;
+    font-family: Gotham;
 }
